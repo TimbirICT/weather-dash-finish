@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     const cityNameInput = document.getElementById("5day");
-    const cityNameDisplay = document.getElementById("city-name");
     const previousSearchesElement = document.getElementById("previous-searches");
 
     const addSearchToPrevious = (search) => {
@@ -11,27 +10,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 previousSearches.shift();
             }
             previousSearches.push(search);
+            console.log("Setting to localStorage:", previousSearches);
             localStorage.setItem("previous-searches", JSON.stringify(previousSearches));
         }
     };
 
     const redirectToSearch = (cityName) => {
+        addSearchToPrevious(cityName);  // Add search to localStorage
+        updatePreviousSearchButtons();  // Update the buttons based on localStorage
         console.log("Attempting to redirect...");
         window.location.href = `search-results.html?city=${cityName}`; 
     };
-
+    
     const findResultsButton = document.getElementById("find-results");
     findResultsButton.addEventListener("click", (e) => {
         e.preventDefault();
         const cityName = cityNameInput.value;
         redirectToSearch(cityName);
     });
-
+    
     function updatePreviousSearchButtons() {
         const previousSearches = JSON.parse(localStorage.getItem("previous-searches")) || [];
+    
+        if (!previousSearchesElement) {
+            console.error('Element with ID "previous-searches" is missing from the DOM.');
+            return;
+        }
+    
         while (previousSearchesElement.firstChild) {
             previousSearchesElement.removeChild(previousSearchesElement.firstChild);
         }
+    
         for (let i = previousSearches.length - 1; i >= Math.max(0, previousSearches.length - 4); i--) {
             const search = previousSearches[i];
             const button = document.createElement("button");
@@ -40,17 +49,13 @@ document.addEventListener("DOMContentLoaded", () => {
             button.addEventListener("click", () => {
                 cityNameInput.value = search;
                 fetchWeatherForecast(search);
-                addSearchToPrevious(search); 
-                updatePreviousSearchButtons();
                 redirectToSearch(search);
             });
+            
             previousSearchesElement.appendChild(button);
         }
     }
-
-    if (previousSearchesElement) {
-        updatePreviousSearchButtons();
-    }
+    
 
     function fetchWeatherForecast(cityName) {
         const apiKey = '5ecdd58a667d9ab9801a998a6ab6d228';
@@ -67,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function displayWeatherForecast(data) {
+        const cityNameDisplay = document.getElementById("city-name");
         const forecastDataElement = document.getElementById("forecast-data");
         const forecastList = data.list;
         forecastDataElement.innerHTML = "";
@@ -86,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const currentDate = new Date();
-        const currentDay = currentDate.toDateString(); 
+        const currentDay = currentDate.toDateString();
 
         if (days[currentDay]) {
             const currentForecast = days[currentDay][0];
@@ -140,9 +146,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const urlParams = new URLSearchParams(window.location.search);
-    const cityName = urlParams.get("city");
+const cityName = urlParams.get("city");
 
-    if (cityName) {
-        fetchWeatherForecast(cityName);
-    }
+if (cityName) {
+    fetchWeatherForecast(cityName);
+}
+
+updatePreviousSearchButtons();
+
 });
