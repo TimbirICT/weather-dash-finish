@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const redirectToSearch = (cityName) => {
-        addSearchToPrevious(cityName);  // Add search to localStorage
-        updatePreviousSearchButtons();  // Update the buttons based on localStorage
+        addSearchToPrevious(cityName); 
+        updatePreviousSearchButtons();  
         console.log("Attempting to redirect...");
         window.location.href = `search-results.html?city=${cityName}`; 
     };
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const forecastList = data.list;
         forecastDataElement.innerHTML = "";
 
-        // Display the city name at the top
+        
         cityNameDisplay.textContent = data.city.name;
 
         const days = {};
